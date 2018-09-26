@@ -1,6 +1,7 @@
-#include "mbed.h"
-#include "FastPWM.h"
 
+
+#include "mbed.h"
+ #include "FastPWM.h"
 //Number of dutycycle steps for output wave
 #define SINE_STEPS        32
 //Frequency of output sine in Hz
@@ -15,34 +16,39 @@ float sine_duty[SINE_STEPS];
 
 
 //Frequency of Pulse Width Modulated signal in Hz
-#define PWM_FREQ          2000
-#define CLOCK_SPEED       16000000
-//PWM pin
-PwmOut PwmPin (D11);
-PwmOut PwmPin2 (D6);
-PwmOut PwmPin3 (D15);
+#define PWM_FREQ          10000
 
+//PWM pin
+FastPWM PwmPinAN (D13);
+FastPWM PwmPinAP (D9);
+FastPWM PwmPinBP (D8);
+FastPWM PwmPinBN (D12);
+FastPWM PwmPinCP (D6);
+FastPWM PwmPinCN (D10);
 //Heartbeat LED
 DigitalOut myled(LED1);
 
-Serial pc(USBTX, USBRX);
+
 //Ticker to update the PWM dutycycle
 Ticker pwm_ticker;
 
 //Ticker calls this fucntion to update the PWM dutycycle
 void pwm_duty_updater() {
   static int idx=0;
-  static int idx2 = 10;
-  static int idx3 = 20;
-  PwmPin.write((sine_duty[idx]));  // Set the dutycycle % to next value in array
-  PwmPin2.write((sine_duty[idx2]));  // Set the dutycycle % to next value in array
-  PwmPin3.write((sine_duty[idx3]));  // Set the dutycycle % to next value in array
-  idx++;                         // Increment the idx
-  idx2++;
-  idx3++;
+  static int idx2=10;
+  static int idx3=22;
+
+  PwmPinAP.write(sine_duty[idx]);  // Set the dutycycle % to next value in array
+  PwmPinAN.write(sine_duty[idx]);  // Set the dutycycle % to next value in array
+  PwmPinBP.write(sine_duty[idx2]);  // Set the dutycycle % to next value in array
+  PwmPinBN.write(sine_duty[idx2]);  // Set the dutycycle % to next value in array
+  PwmPinCP.write(sine_duty[idx3]);  // Set the dutycycle % to next value in array
+  PwmPinCN.write(sine_duty[idx3]);  // Set the dutycycle % to next value in array
+
+  idx++; idx2++; idx3++;                       // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
-  if(idx2 == SINE_STEPS) idx2=0;
-  if(idx3 == SINE_STEPS) idx3=0;
+  if (idx2 == SINE_STEPS) idx2=0;
+  if (idx3 == SINE_STEPS) idx3=0;
 
 }
 
@@ -55,9 +61,13 @@ int main() {
   }
 
   // Set PWM frequency to 200 KHz (period = 5 us)
-  PwmPin.period( (1.0f / (float) PWM_FREQ));
-  PwmPin2.period( (1.0f / (float) PWM_FREQ));
-  PwmPin3.period( (1.0f / (float) PWM_FREQ));
+  PwmPinAP.period( 1.0f / (float) PWM_FREQ);
+  PwmPinAN.period( 1.0f / (float) PWM_FREQ);
+  PwmPinBP.period( 1.0f / (float) PWM_FREQ);
+  PwmPinBN.period( 1.0f / (float) PWM_FREQ);
+  PwmPinCP.period( 1.0f / (float) PWM_FREQ);
+  PwmPinCN.period( 1.0f / (float) PWM_FREQ);
+
 
 
   // Init the Ticker to call the dutycyle updater at the required interval
