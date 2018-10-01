@@ -45,13 +45,13 @@ private:
 std::map <std::string, PwmPins> PwmPin;
 
 // Set PWM frequency to 200 KHz (period = 5 us)
-PwmPin["D3"] = PwmPins(D3, 10000, 16000000);
-PwmPin["D9"] = PwmPins(D9, 10000, 16000000),
-PwmPin["D8"] = PwmPins(D8, 10000, 16000000);
+PwmPin["D3"]  = PwmPins(D3, 10000, 16000000);
+PwmPin["D9"]  = PwmPins(D9, 10000, 16000000),
+PwmPin["D8"]  = PwmPins(D8, 10000, 16000000);
 PwmPin["D12"] = PwmPins(D12, 10000, 16000000);
-PwmPin["D6"] = PwmPins(D6, 10000, 16000000);
+PwmPin["D6"]  = PwmPins(D6, 10000, 16000000);
 PwmPin["D10"] = PwmPins(D10, 10000, 16000000),
-PwmPin["A0"] = PwmPins(A0, 100000, 16000000);
+PwmPin["A0"]  = PwmPins(A0, 100000, 16000000);
 
 //Heartbeat LED
 DigitalOut myled(LED1);
@@ -68,8 +68,8 @@ void pwm_duty_updater() {
   static int idx3=22;
 
   PwmPin["D9"].SetDuty(sine_duty[idx]);  // Set the dutycycle % to next value in array
-  PwmPin["D8"].SetDuty(sine_duty[idx]);  // Set the dutycycle % to next value in array
-  PwmPin["D6"].SetDuty(sine_duty[idx]);  // Set the dutycycle % to next value in array
+  PwmPin["D8"].SetDuty(sine_duty[idx2]);  // Set the dutycycle % to next value in array
+  PwmPin["D6"].SetDuty(sine_duty[idx3]);  // Set the dutycycle % to next value in array
 
   idx++; idx2++; idx3++;                        // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
