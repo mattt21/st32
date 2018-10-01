@@ -1,9 +1,7 @@
 #include "mbed.h"
 #include "FastPWM.h"
-#include <map>
-#include <string>
+#include "PWM.h"
 
-using namespace std;
 // Number of dutycycle steps for output wave
 #define SINE_STEPS        32
 // Frequency of output sine in Hz
@@ -12,21 +10,23 @@ using namespace std;
 // Constants to compute the sine waveform
 #define PI                 3.141592f
 #define SINE_STEPS_RAD    (2.0f * PI / (float)SINE_STEPS)
-#define PWM_FREQ 10000
-#define BOOST_FREQ 100000
+
 // Table to generate the sine waveform using dutycycles
 float sine_duty[SINE_STEPS];
 
+//PWM pinout mapping
+PWMPinout pwmArray[] = {
+  PWMPinout(FastPWM(D3), 10000, 16000000),
+  PWMPinout(FastPWM(D9), 10000, 16000000),
+  PWMPinout(FastPWM(D8), 10000, 16000000),
+  PWMPinout(FastPWM(D12), 10000, 16000000),
+  PWMPinout(FastPWM(D6), 10000, 16000000),
+  PWMPinout(FastPWM(D10), 10000, 16000000),
+  PWMPinout(FastPWM(A0), 100000, 16000000),
+};
+
 AnalogIn DCCurrentIn (A1);
 AnalogIn DCVoltageIn (A2);
-
-FastPWM AP (D3);
-FastPWM AN (D9);
-FastPWM BP (D8);
-FastPWM BN (D12);
-FastPWM CP (D6);
-FastPWM CN (D10);
-FastPWM Boost(A0);
 //Heartbeat LED
 DigitalOut myled(LED1);
 
@@ -41,9 +41,9 @@ void pwm_duty_updater() {
   static int idx2=10;
   static int idx3=22;
 
-  AP.write(sine_duty[idx]);  // Set the dutycycle % to next value in array
-  BP.write(sine_duty[idx2]);  // Set the dutycycle % to next value in array
-  CP.write(sine_duty[idx3]);  // Set the dutycycle % to next value in array
+  pwmArray[1].SetDuty(sine_duty[idx]);  // Set the dutycycle % to next value in array
+  pwmArray[2].SetDuty(sine_duty[idx2]);  // Set the dutycycle % to next value in array
+  pwmArray[4].SetDuty(sine_duty[idx3]);  // Set the dutycycle % to next value in array
 
   idx++; idx2++; idx3++;                        // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
@@ -57,9 +57,9 @@ void pwm_duty_updaterN() {
   static int idx2=10;
   static int idx3=22;
 
-  AN.write(sine_duty[SINE_STEPS-idx-1]);  // Set the dutycycle % to next value in array
-  BN.write(sine_duty[SINE_STEPS-idx2-1]);  // Set the dutycycle % to next value in array
-  CN.write(sine_duty[SINE_STEPS-idx3-1]);  // Set the dutycycle % to next value in array
+  pwmArray[0].SetDuty(sine_duty[SINE_STEPS-idx-1]);  // Set the dutycycle % to next value in array
+  pwmArray[1].SetDuty(sine_duty[SINE_STEPS-idx2]);  // Set the dutycycle % to next value in array
+  pwmArray[2].SetDuty(sine_duty[SINE_STEPS-idx3]);  // Set the dutycycle % to next value in array
 
   idx++; idx2++; idx3++;                        // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
@@ -78,53 +78,36 @@ double getPanelCurrent() {
 double calculateDutyCycle()
 {
   /*
-  static double oldVoltage = 0;
-  static double oldCurrent = 0;
-  static double dutyCycle = 0.2;
+  static double old_solar_panel_voltage = 0;
+  static double old_solar_panel_current = 0;
+  static double dutyCycle = 0.5;
   double deltaB = 0.001;
-  double currentVoltage = getPanelVoltage();
-  double currentCurrent = getPanelCurrent();
+  double current_pannel_voltage = getPanelVoltage();
+  double current_panel_current = getPanelCurrent();
 
-  double currentPower = currentCurrent*currentPower;
-  double pastPower = oldVoltage*oldCurrent;
+  double panel_power = current_panel_current*current_pannel_voltage;
+  double past_power = old_solar_panel_current*old_solar_panel_voltage;
 
-  if (pastPower > currentPower) {
-    if (oldVoltage > currentVoltage) {
-    dutyCycle -= deltaB;
-  }
-    else {
+  if (panel_power > past_power) {
+
     dutyCycle += deltaB;
+    return dutyCycle
   }
-  }
-  else {
-  if (oldVoltage > currentVoltage) {
+  if (past_power > panel_power) {
+  deltaB *= -1;
   dutyCycle += deltaB;
-  }
-  else {
-  dutyCycle -= deltaB;
-  }
-
-  }
-  oldVoltage = currentVoltage;
-  oldCurrent = currentCurrent;
-
-  if (dutyCycle >= 0.8)
-  {
-  dutyCycle = 0.8;
-}
-  if (dutyCycle <= 0.2) {
-  dutyCycle = 0.2;
+  return dutyCycle;
 }
   return dutyCycle;
 
   */
-  return 0.2;
+  return 0.5;
 }
 
 void boostUpdater()
 {
   static double dutyCycle = calculateDutyCycle();
-  Boost.write(dutyCycle);
+  pwmArray[6].SetDuty(dutyCycle);
 }
 
 
@@ -139,13 +122,6 @@ int main() {
 
   // Init the Ticker to call the dutycyle updater at the required interval
   // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
-  AP.period( 1.0f / (float) PWM_FREQ);
-  AN.period( 1.0f / (float) PWM_FREQ);
-  BP.period( 1.0f / (float) PWM_FREQ);
-  BN.period( 1.0f / (float) PWM_FREQ);
-  CP.period( 1.0f / (float) PWM_FREQ);
-  CN.period( 1.0f / (float) PWM_FREQ);
-  Boost.period( 1.0f/ (float) BOOST_FREQ);
 
   __disable_irq();
   pwm_ticker.attach(&pwm_duty_updater, 1.0f / (float)(SINE_STEPS * SINE_OUT_FREQ));
