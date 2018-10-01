@@ -12,28 +12,51 @@
 // Table to generate the sine waveform using dutycycles
 float sine_duty[SINE_STEPS];
 
+class PwmPins{
 
-// Frequency of Pulse Width Modulated signal in Hz
-#define PWM_FREQ          10000
-#define BOOST_FREQ        100000
+private:
+  //Pinout
+  FastPWM pin;
+  //Frequency of Pulse Width Modulated signal in Hz
+  double freq;
+  //Clock speed
+  double clock;
 
-// PWM pin
-FastPWM PwmPinAN (D3);
-FastPWM PwmPinAP (D9);
-FastPWM PwmPinBP (D8);
-FastPWM PwmPinBN (D12);
-FastPWM PwmPinCP (D6);
-FastPWM PwmPinCN (D10);
-FastPWM PwmBoost(A0);
+public:
+  PwmPins(FastPWM _pin, double _freq, double _clock):
+  pin(_pin),
+  freq(_freq),
+  clock(_clock)
+  { SetFreq(); }
 
-// Analog In Pins
-AnalogIn DCCurrentIn (A1);
-AnalogIn DCVoltageIn (A2);
-// Heartbeat LED
+  void SetFreq(){
+    pin.period((1.0f / (float) freq));
+  }
+  void SetDuty(float _duty){
+    pin.write(_duty);
+  }
+
+
+private:
+
+};
+
+//PWM pinout mapping
+std::map <std::string, PwmPins> PwmPin;
+
+// Set PWM frequency to 200 KHz (period = 5 us)
+PwmPin["D3"]  = PwmPins(D3, 10000, 16000000);
+PwmPin["D9"]  = PwmPins(D9, 10000, 16000000),
+PwmPin["D8"]  = PwmPins(D8, 10000, 16000000);
+PwmPin["D12"] = PwmPins(D12, 10000, 16000000);
+PwmPin["D6"]  = PwmPins(D6, 10000, 16000000);
+PwmPin["D10"] = PwmPins(D10, 10000, 16000000),
+PwmPin["A0"]  = PwmPins(A0, 100000, 16000000);
+
+//Heartbeat LED
 DigitalOut myled(LED1);
 
-
-// Ticker to update the PWM dutycycle
+//Ticker to update the PWM dutycycle
 Ticker pwm_ticker;
 Ticker pwm_tickerN;
 Ticker boost_ticker;
@@ -44,9 +67,9 @@ void pwm_duty_updater() {
   static int idx2=10;
   static int idx3=22;
 
-  PwmPinAP.write(sine_duty[idx]);  // Set the dutycycle % to next value in array
-  PwmPinBP.write(sine_duty[idx2]);  // Set the dutycycle % to next value in array
-  PwmPinCP.write(sine_duty[idx3]);  // Set the dutycycle % to next value in array
+  PwmPin["D9"].SetDuty(sine_duty[idx]);  // Set the dutycycle % to next value in array
+  PwmPin["D8"].SetDuty(sine_duty[idx2]);  // Set the dutycycle % to next value in array
+  PwmPin["D6"].SetDuty(sine_duty[idx3]);  // Set the dutycycle % to next value in array
 
   idx++; idx2++; idx3++;                        // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
@@ -60,9 +83,9 @@ void pwm_duty_updaterN() {
   static int idx2=10;
   static int idx3=22;
 
-  PwmPinAN.write(sine_duty[SINE_STEPS-idx-1]);  // Set the dutycycle % to next value in array
-  PwmPinBN.write(sine_duty[SINE_STEPS-idx2-1]);  // Set the dutycycle % to next value in array
-  PwmPinCN.write(sine_duty[SINE_STEPS-idx3-1]);  // Set the dutycycle % to next value in array
+  PwmPin["D3"].SetDuty(sine_duty[SINE_STEPS-idx-1]);  // Set the dutycycle % to next value in array
+  PwmPin["D9"].SetDuty(sine_duty[SINE_STEPS-idx2]);  // Set the dutycycle % to next value in array
+  PwmPin["D8"].SetDuty(sine_duty[SINE_STEPS-idx3]);  // Set the dutycycle % to next value in array
 
   idx++; idx2++; idx3++;                        // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
@@ -109,10 +132,8 @@ double calculateDutyCycle()
 
 void boostUpdater()
 {
-  static double dutyCycle = 0;
-  dutyCycle = calculateDutyCycle();
-  PwmBoost.write(dutyCycle);
-
+  static double dutyCycle = calculateDutyCycle();
+  PwmPin["A0"].SetDuty(dutyCycle);
 }
 
 
@@ -124,16 +145,6 @@ int main() {
   for (i=0; i<SINE_STEPS; i++) {
     sine_duty[i] = ( sin(i * SINE_STEPS_RAD) + 1.0f ) / 2.0f;  // convert sine (-1.0 .. +1.0) into dutycycle (0.0 .. 1.0)
   }
-  // Set PWM frequency to 200 KHz (period = 5 us)
-  PwmPinAP.period( 1.0f / (float) PWM_FREQ);
-  PwmPinAN.period( 1.0f / (float) PWM_FREQ);
-  PwmPinBP.period( 1.0f / (float) PWM_FREQ);
-  PwmPinBN.period( 1.0f / (float) PWM_FREQ);
-  PwmPinCP.period( 1.0f / (float) PWM_FREQ);
-  PwmPinCN.period( 1.0f / (float) PWM_FREQ);
-  PwmBoost.period( 1.0f/ (float) BOOST_FREQ);
-  PwmBoost.write(0.5);
-
 
   // Init the Ticker to call the dutycyle updater at the required interval
   // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
