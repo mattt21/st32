@@ -1,25 +1,23 @@
-
-
 #include "mbed.h"
 #include "FastPWM.h"
-//Number of dutycycle steps for output wave
+// Number of dutycycle steps for output wave
 #define SINE_STEPS        32
-//Frequency of output sine in Hz
+// Frequency of output sine in Hz
 #define SINE_OUT_FREQ     60
 
-//Constants to compute the sine waveform
+// Constants to compute the sine waveform
 #define PI                 3.141592f
 #define SINE_STEPS_RAD    (2.0f * PI / (float)SINE_STEPS)
 
-//Table to generate the sine waveform using dutycycles
+// Table to generate the sine waveform using dutycycles
 float sine_duty[SINE_STEPS];
 
 
-//Frequency of Pulse Width Modulated signal in Hz
+// Frequency of Pulse Width Modulated signal in Hz
 #define PWM_FREQ          10000
 #define BOOST_FREQ        100000
 
-//PWM pin
+// PWM pin
 FastPWM PwmPinAN (D3);
 FastPWM PwmPinAP (D9);
 FastPWM PwmPinBP (D8);
@@ -27,16 +25,20 @@ FastPWM PwmPinBN (D12);
 FastPWM PwmPinCP (D6);
 FastPWM PwmPinCN (D10);
 FastPWM PwmBoost(A0);
-//Heartbeat LED
+
+// Analog In Pins
+AnalogIn DCCurrentIn (A1);
+AnalogIn DCVoltageIn (A2);
+// Heartbeat LED
 DigitalOut myled(LED1);
 
 
-//Ticker to update the PWM dutycycle
+// Ticker to update the PWM dutycycle
 Ticker pwm_ticker;
 Ticker pwm_tickerN;
 Ticker boost_ticker;
 
-//Ticker calls this fucntion to update the PWM dutycycle
+// Ticker calls this fucntion to update the PWM dutycycle
 void pwm_duty_updater() {
   static int idx=0;
   static int idx2=10;
@@ -58,9 +60,9 @@ void pwm_duty_updaterN() {
   static int idx2=10;
   static int idx3=22;
 
-  PwmPinAN.write(sine_duty[31-idx]);  // Set the dutycycle % to next value in array
-  PwmPinBN.write(sine_duty[31-idx2]);  // Set the dutycycle % to next value in array
-  PwmPinCN.write(sine_duty[31-idx3]);  // Set the dutycycle % to next value in array
+  PwmPinAN.write(sine_duty[SINE_STEPS-idx-1]);  // Set the dutycycle % to next value in array
+  PwmPinBN.write(sine_duty[SINE_STEPS-idx2-1]);  // Set the dutycycle % to next value in array
+  PwmPinCN.write(sine_duty[SINE_STEPS-idx3-1]);  // Set the dutycycle % to next value in array
 
   idx++; idx2++; idx3++;                        // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
@@ -68,13 +70,52 @@ void pwm_duty_updaterN() {
   if (idx3 == SINE_STEPS) idx3=0;
 
 }
+double getPanelVoltage(){
+  return DCVoltageIn.read();
+}
+double getPanelCurrent() {
+  return DCCurrentIn.read();
+
+}
+
+double calculateDutyCycle()
+{
+  /*
+  static double old_solar_panel_voltage = 0;
+  static double old_solar_panel_current = 0;
+  static double dutyCycle = 0.5;
+  double deltaB = 0.001;
+  double current_pannel_voltage = getPanelVoltage();
+  double current_panel_current = getPanelCurrent();
+
+  double panel_power = current_panel_current*current_pannel_voltage;
+  double past_power = old_solar_panel_current*old_solar_panel_voltage;
+
+  if (panel_power > past_power) {
+
+    dutyCycle += deltaB;
+    return dutyCycle
+  }
+  if (past_power > panel_power) {
+  deltaB *= -1;
+  dutyCycle += deltaB;
+  return dutyCycle;
+}
+  return dutyCycle;
+
+  */
+  return 0.5;
+}
 
 void boostUpdater()
 {
-  double dutyCycle = .5;
+  static double dutyCycle = 0;
+  dutyCycle = calculateDutyCycle();
   PwmBoost.write(dutyCycle);
 
 }
+
+
 
 int main() {
   int i;
@@ -91,6 +132,7 @@ int main() {
   PwmPinCP.period( 1.0f / (float) PWM_FREQ);
   PwmPinCN.period( 1.0f / (float) PWM_FREQ);
   PwmBoost.period( 1.0f/ (float) BOOST_FREQ);
+  PwmBoost.write(0.5);
 
 
   // Init the Ticker to call the dutycyle updater at the required interval
