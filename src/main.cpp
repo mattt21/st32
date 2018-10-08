@@ -41,9 +41,9 @@ void pwm_duty_updater() {
   static int idx2=10;
   static int idx3=22;
 
-  pwmArray[1].SetDuty(sine_duty[idx]);  // Set the dutycycle % to next value in array
-  pwmArray[2].SetDuty(sine_duty[idx2]);  // Set the dutycycle % to next value in array
-  pwmArray[4].SetDuty(sine_duty[idx3]);  // Set the dutycycle % to next value in array
+  pwmArray[3].SetDuty(sine_duty[idx]);  // Set the dutycycle % to next value in array
+  pwmArray[4].SetDuty(sine_duty[idx2]);  // Set the dutycycle % to next value in array
+  pwmArray[5].SetDuty(sine_duty[idx3]);  // Set the dutycycle % to next value in array
 
   idx++; idx2++; idx3++;                        // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
@@ -58,8 +58,8 @@ void pwm_duty_updaterN() {
   static int idx3=22;
 
   pwmArray[0].SetDuty(sine_duty[SINE_STEPS-idx-1]);  // Set the dutycycle % to next value in array
-  pwmArray[1].SetDuty(sine_duty[SINE_STEPS-idx2]);  // Set the dutycycle % to next value in array
-  pwmArray[2].SetDuty(sine_duty[SINE_STEPS-idx3]);  // Set the dutycycle % to next value in array
+  pwmArray[1].SetDuty(sine_duty[SINE_STEPS-idx2-1]);  // Set the dutycycle % to next value in array
+  pwmArray[2].SetDuty(sine_duty[SINE_STEPS-idx3-1]);  // Set the dutycycle % to next value in array
 
   idx++; idx2++; idx3++;                        // Increment the idx
   if (idx == SINE_STEPS) idx=0;  // Reset the idx when teh end has been reached
@@ -106,8 +106,8 @@ double calculateDutyCycle()
 
 void boostUpdater()
 {
-  static double dutyCycle = calculateDutyCycle();
-  pwmArray[6].SetDuty(dutyCycle);
+  //static double dutyCycle = calculateDutyCycle();
+  pwmArray[6].SetDuty(0.2);
 }
 
 
