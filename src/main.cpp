@@ -2,6 +2,7 @@
 #include "FastPWM.h"
 #include "PWM.h"
 #include <string>
+#include "bleopcode.h"
 
 // Number of dutycycle steps for output wave
 #define SINE_STEPS        32

@@ -1,5 +1,12 @@
+// Copyright (c) 
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "FastPWM.h"
 #include "mbed.h"
+
+#ifndef PWM_PINOUT
+#define PWM_PINOUT
 
 class PWMPinout{
 
@@ -19,3 +26,5 @@ public:
   void SetDuty(float _duty);
 
 };
+
+#endif
