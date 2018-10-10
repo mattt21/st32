@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "FastPWM.h"
 #include "PWM.h"
+#include <string>
 
 // Number of dutycycle steps for output wave
 #define SINE_STEPS        32
@@ -30,6 +31,16 @@ AnalogIn DCVoltageIn (A2);
 //Heartbeat LED
 DigitalOut myled(LED1);
 
+/*
+  device HM-10
+  HM10 - STM32
+  GND -> GND
+  VCC -> (5V)
+  RX <-> D10 (tx)
+  TX <-> D2(rx)
+*/
+Serial bluetooth(D10, D2); //tx, rx
+Serial pc(D1, D0); //tx, rx
 //Ticker to update the PWM dutycycle
 Ticker pwm_ticker;
 Ticker pwm_tickerN;
@@ -110,12 +121,23 @@ void boostUpdater()
   pwmArray[6].SetDuty(dutyCycle);
 }
 
-
+void bleData(){
+  while(bluetooth.readable()){
+    myled = !myled;
+    char temp = bluetooth.getc();
+    printf("%c ", temp);
+    bluetooth.putc(temp);
+  }
+}
 
 int main() {
   int i;
 
+  bluetooth.baud(9600);
+  bluetooth.attach(&bleData);
+
   // Init the duty cycle array
+
   for (i=0; i<SINE_STEPS; i++) {
     sine_duty[i] = ( sin(i * SINE_STEPS_RAD) + 1.0f ) / 2.0f;  // convert sine (-1.0 .. +1.0) into dutycycle (0.0 .. 1.0)
   }
@@ -133,5 +155,6 @@ int main() {
     myled = !myled;
     wait(0.5);
   }
+
 
 }
