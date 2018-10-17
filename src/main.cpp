@@ -2,6 +2,7 @@
 #include "FastPWM.h"
 #include "PWM.h"
 #include <string>
+#include <vector>
 #include "bleopcode.h"
 
 // Number of dutycycle steps for output wave
@@ -16,22 +17,6 @@
 // Table to generate the sine waveform using dutycycles
 float sine_duty[SINE_STEPS];
 
-//PWM pinout mapping
-PWMPinout pwmArray[] = {
-  PWMPinout(FastPWM(D3), 10000, 16000000),
-  PWMPinout(FastPWM(D9), 10000, 16000000),
-  PWMPinout(FastPWM(D8), 10000, 16000000),
-  PWMPinout(FastPWM(D12), 10000, 16000000),
-  PWMPinout(FastPWM(D6), 10000, 16000000),
-  PWMPinout(FastPWM(D10), 10000, 16000000),
-  PWMPinout(FastPWM(A0), 100000, 16000000),
-};
-
-AnalogIn DCCurrentIn (A1);
-AnalogIn DCVoltageIn (A2);
-//Heartbeat LED
-DigitalOut myled(LED1);
-
 /*
   device HM-10
   HM10 - STM32
@@ -42,6 +27,22 @@ DigitalOut myled(LED1);
 */
 Serial bluetooth(D10, D2); //tx, rx
 Serial pc(D1, D0); //tx, rx
+//Heartbeat LED
+DigitalOut myled(LED1);
+//PWM pinout mapping
+PWMPinout pwmArray[] = {
+  PWMPinout(FastPWM(D3), 10000, 16000000),
+  PWMPinout(FastPWM(D9), 10000, 16000000),
+  PWMPinout(FastPWM(D8), 10000, 16000000),
+  PWMPinout(FastPWM(D12), 10000, 16000000),
+  PWMPinout(FastPWM(D6), 10000, 16000000),
+  PWMPinout(FastPWM(D11), 10000, 16000000),
+  PWMPinout(FastPWM(A0), 100000, 16000000),
+};
+
+AnalogIn DCCurrentIn (A1);
+AnalogIn DCVoltageIn (A2);
+
 //Ticker to update the PWM dutycycle
 Ticker pwm_ticker;
 Ticker pwm_tickerN;
@@ -122,12 +123,18 @@ void boostUpdater()
   pwmArray[6].SetDuty(dutyCycle);
 }
 
+/*
+ * Interrupt for receiving
+ * data from smart-phone
+ */
 void bleData(){
+  std::vector<char> bleData;
+  bleData.clear();
   while(bluetooth.readable()){
     myled = !myled;
-    char temp = bluetooth.getc();
-    printf("%c ", temp);
-    bluetooth.putc(temp);
+    bleData.push_back(bluetooth.getc());
+    pc.printf("%c ", bleData[bleData.size() - 1]);
+    bluetooth.putc(bleData[bleData.size() - 1]);
   }
 }
 

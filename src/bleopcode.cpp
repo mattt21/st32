@@ -4,28 +4,12 @@
 
 #include "bleopcode.h"
 
-const char* GetOpName(opcodetype opcode)
-{
-    switch (opcode)
-    {
-    // push value
-    case OP_0                      : return "0";
-    case OP_1                      : return "1";
-    case OP_2                      : return "2";
-    case OP_3                      : return "3";
-    case OP_4                      : return "4";
-    case OP_5                      : return "5";
-    case OP_6                      : return "6";
-    case OP_7                      : return "7";
-    case OP_8                      : return "8";
-    case OP_9                      : return "9";
-    default                        : return "OP_ERROR";
-    }
-}
+bool EvalCode(std::vector<char> &bleData){
+  //First two bytes always an opcode
+  if(bleData.size() < 2)
+    return false;
 
-bool EvalCode(char* op){
-  //First byte is always an opcode
-  opcodetype opcode = (opcodetype)op[0];
+  opcodetype opcode = (opcodetype)(bleData[0] + bleData[1]);
 
   switch(opcode){
 
@@ -66,6 +50,10 @@ bool EvalCode(char* op){
 
     }
     case OP_9 :
+    {
+
+    }
+    case OP_10 :
     {
 
     }
