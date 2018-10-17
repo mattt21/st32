@@ -15,47 +15,47 @@ bool EvalCode(std::vector<char> &bleData){
 
     case OP_0 :
     {
-
+      return true;
     }
     case OP_1 :
     {
-
+      return true;
     }
     case OP_2 :
     {
-
+      return true;
     }
     case OP_3 :
     {
-
+      return true;
     }
     case OP_4 :
     {
-
+      return true;
     }
     case OP_5 :
     {
-
+      return true;
     }
     case OP_6 :
     {
-
+      return true;
     }
     case OP_7 :
     {
-
+      return true;
     }
     case OP_8 :
     {
-
+      return true;
     }
     case OP_9 :
     {
-
+      return true;
     }
     case OP_10 :
     {
-
+      return true;
     }
     default :
     {

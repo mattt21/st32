@@ -127,22 +127,27 @@ void boostUpdater()
  * Interrupt for receiving
  * data from smart-phone
  */
-void bleData(){
+void bleGetData(){
   std::vector<char> bleData;
   bleData.clear();
   while(bluetooth.readable()){
     myled = !myled;
     bleData.push_back(bluetooth.getc());
-    pc.printf("%c ", bleData[bleData.size() - 1]);
-    bluetooth.putc(bleData[bleData.size() - 1]);
+    //pc.printf("%c ", bleData[bleData.size() - 1]);
+    //bluetooth.putc(bleData[bleData.size() - 1]);
   }
+  EvalCode(bleData);
+}
+
+void blePushData(std::vector<char> &bleData){
+  EvalCode(bleData);
 }
 
 int main() {
   int i;
 
   bluetooth.baud(9600);
-  bluetooth.attach(&bleData);
+  bluetooth.attach(&bleGetData);
 
   // Init the duty cycle array
 
