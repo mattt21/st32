@@ -1,6 +1,26 @@
 #include "Inverter.h"
 
 
+DigitalOut AP(D3);
+DigitalOut AN(D9);
+DigitalOut BP(D8);
+DigitalOut BN(D12);
+DigitalOut CP(D6);
+DigitalOut CN(D7);
+#define SINE_STEPS        750
+// Frequency of output sine in Hz
+
+#define TRIANGE_FREQUENCY 12000
+
+#define TRIANGLE_STEPS  10
+
+// Constants to compute the sine waveform
+#define PI                 3.141592f
+#define SINE_STEPS_RAD    (2.0f * PI / (float)SINE_STEPS)
+#define SWM_STEPS         24
+// Table to generate the sine waveform using dutycycles
+float sine_duty[SINE_STEPS];
+
 void initInverter() {
   int i;
   // Generate Sine Wave
