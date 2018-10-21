@@ -111,6 +111,7 @@ int main() {
   // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
 
   myled = 1;
+  initInverter();
   __disable_irq();
   boost_ticker.attach(&boostUpdater, 2);
   __enable_irq();

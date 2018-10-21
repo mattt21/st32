@@ -7,11 +7,12 @@ DigitalOut BP(D8);
 DigitalOut BN(D12);
 DigitalOut CP(D6);
 DigitalOut CN(D7);
+
+// Number of elements in sampled sine wave
 #define SINE_STEPS        750
-// Frequency of output sine in Hz
-
+// Frequency of output triangle in Hz
 #define TRIANGE_FREQUENCY 12000
-
+// Number of steps per each Triangle Wave
 #define TRIANGLE_STEPS  10
 
 // Constants to compute the sine waveform
@@ -25,7 +26,7 @@ void initInverter() {
   int i;
   // Generate Sine Wave
   for (i=0; i<SINE_STEPS; i++) {
-    sine_duty[i] = sin(i * SINE_STEPS_RAD);  // convert sine (-1.0 .. +1.0) into dutycycle (0.0 .. 1.0)
+    sine_duty[i] = sin(i * SINE_STEPS_RAD);
   }
   //Attach Intterupt
   pwm_ticker.attach(&pwm_duty_updater, (1.0f / (float)(10 * TRIANGE_FREQUENCY) - 1e-6f));
@@ -41,52 +42,38 @@ void pwm_duty_updater() {
   vector <DigitalOut> toZero;
   vector <DigitalOut> toOne;
   // Comparing the values for each PWM pin
-  if (sine_duty[sine_index] >= counter)
-  {
-    if(AP == 0) {
+  if (sine_duty[sine_index] >= counter && AP == 0) {
       toZero.push_back(AN);
       toOne.push_back(AP);
-    }
   }
-  else {
-    if(AP == 1) {
+  else if(AP == 1) {
       toZero.push_back(AP);
       toOne.push_back(AN);
-    }
   }
 
-  if (sine_duty[(sine_index + SINE_STEPS/3)%SINE_STEPS] >= counter)
-  {
-    if(BP == 0) {
+  if (sine_duty[(sine_index + SINE_STEPS/3)%SINE_STEPS] >= counter && BP == 0) {
       toZero.push_back(BN);
       toOne.push_back(BP);
-    }
   }
-  else {
-    if(BP == 1) {
+  else if(BP == 1) {
       toZero.push_back(BP);
       toOne.push_back(BN);
-    }
   }
 
-  if (sine_duty[(sine_index + 2*SINE_STEPS/3)%SINE_STEPS] >= counter)
-  {
-    if(CP == 0) {
+  if (sine_duty[(sine_index + 2*SINE_STEPS/3)%SINE_STEPS] >= counter && CP == 0) {
       toZero.push_back(CN);
       toOne.push_back(CP);
-    }
   }
-  else {
-    if(CP == 1) {
+  else if(CP == 1) {
       toZero.push_back(CP);
       toOne.push_back(CN);
-    }
   }
 
   // Set the correct pins to zero
   for (int i = 0; i < toZero.size(); i++) {
     toZero[i] = 0;
   }
+  // Wait the dead Time. I approximated it as 1000 nanoseconds or 1 microsecond
   wait_us(1);
   for (int i = 0; i < toOne.size(); i++) {
     toOne[i] = 1;
