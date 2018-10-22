@@ -1,13 +1,14 @@
-#include "mbed.h"
+
 #include "rtos.h"
 #include "FastPWM.h"
 #include "PWM.h"
 #include <string>
-#include <vector>
 #include "bleopcode.h"
 #include "Inverter.h"
+#include "main.h"
+#include "mbed.h"
 
-
+double tempValue;
 
 /*
   device HM-10
@@ -83,23 +84,28 @@ void boostUpdater()
  * data from smart-phone
  */
 void bleGetData(){
-  std::vector<char> bleData;
-  bleData.clear();
+  //std::vector<char> bleData;
+  //bleData.clear();
   while(bluetooth.readable()){
     myled = !myled;
-    bleData.push_back(bluetooth.getc());
+    //bleData.push_back(bluetooth.getc());
     //pc.printf("%c ", bleData[bleData.size() - 1]);
-    //bluetooth.putc(bleData[bleData.size() - 1]);
+    bluetooth.putc(bluetooth.getc());
   }
-  EvalCode(bleData);
+  //EvalCode(bleData);
+  //bluetooth.putc('r');
+  //bluetooth.putc('a');
 }
 
 void blePushData(std::vector<char> &bleData){
-  EvalCode(bleData);
+  for(char bd: bleData){
+    bluetooth.putc(bd);
+  }
 }
 
 int main() {
 
+  tempValue = 0;
   bluetooth.baud(9600);
   bluetooth.attach(&bleGetData);
 
