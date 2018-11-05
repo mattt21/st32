@@ -41,6 +41,9 @@ bool EvalCode(std::vector<char> &bleData){
     {
       std::vector<char> tempVec;
       tempVec.push_back('0');
+      tempVec.push_back('2');
+      tempVec.push_back('1');
+      tempVec.push_back('3');
       blePushData(tempVec);
       return true;
     }

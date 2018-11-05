@@ -148,10 +148,12 @@ int main() {
   // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
 
   myled = 0;
+  /*
   initInverter();
   __disable_irq();
   boost_ticker.attach(&boostUpdater, 2);
   __enable_irq();
+  */
 
   while(1){ //infinite loop
     //wait(0.5);
@@ -161,7 +163,7 @@ int main() {
     }
     //found delimiter, process command now
     if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
-      calculateChecksum(bleData);
+      //calculateChecksum(bleData);
       EvalCode(bleData);
       bluetooth.putc(' ');
       bluetooth.putc('O');
