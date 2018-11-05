@@ -79,6 +79,28 @@ void boostUpdater()
   Boost.write(dutyCycle);
 }
 std::vector<char> bleData;
+
+//Ensure data streams are correct
+bool validateChecksum(std::vector<char> &bleTempData)
+{
+    int32_t pos = 0;
+    char sum = 0;
+    for(int i = 0; i < bleTempData.size() - 1; i++){
+      sum += bleTempData[i];
+    }
+    // return 0 or 1 based on the checksum test
+    return (sum == bleTempData[bleTempData.size() - 1]) ? 1 : 0;
+}
+
+char calculateChecksum(std::vector<char> &bleTempData)
+{
+    char sum = 0;
+    for(int i = 0; i < bleTempData.size(); i++){
+      sum += bleTempData[i];
+    }
+    // put the checksum into the data stream
+    return sum;
+}
 /*
  * Interrupt for receiving
  * data from smart-phone
@@ -101,9 +123,12 @@ void bleGetData(){
 }
 
 void blePushData(std::vector<char> &bleTempData){
+
   for(int i = 0; i < bleTempData.size(); i++){
     bluetooth.putc(bleTempData[i]);
   }
+  //Place checksum
+  //bluetooth.putc(calculateChecksum(bleTempData));
 }
 
 int main() {
@@ -136,6 +161,7 @@ int main() {
     }
     //found delimiter, process command now
     if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
+      calculateChecksum(bleData);
       EvalCode(bleData);
       bluetooth.putc(' ');
       bluetooth.putc('O');
@@ -143,5 +169,5 @@ int main() {
       bleData.clear();
     }
   }
-  
+
 }
