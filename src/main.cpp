@@ -78,28 +78,31 @@ void boostUpdater()
   static double dutyCycle = calculateDutyCycle();
   Boost.write(dutyCycle);
 }
-
+std::vector<char> bleData;
 /*
  * Interrupt for receiving
  * data from smart-phone
+ * '_' triggers eoc(end-of-command)
+ * opcode pulled from last 2 values
  */
 void bleGetData(){
-  //std::vector<char> bleData;
-  //bleData.clear();
   while(bluetooth.readable()){
     myled = !myled;
-    //bleData.push_back(bluetooth.getc());
-    //pc.printf("%c ", bleData[bleData.size() - 1]);
-    bluetooth.putc(bluetooth.getc());
+    bleData.push_back(bluetooth.getc());
   }
-  //EvalCode(bleData);
-  //bluetooth.putc('r');
-  //bluetooth.putc('a');
+  //found delimiter, process command now
+  if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
+    //EvalCode(bleData);
+    bluetooth.putc(' ');
+    bluetooth.putc('O');
+    bluetooth.putc('K');
+    bleData.clear();
+  }
 }
 
-void blePushData(std::vector<char> &bleData){
-  for(char bd: bleData){
-    bluetooth.putc(bd);
+void blePushData(std::vector<char> &bleTempData){
+  for(int i = 0; i < bleTempData.size(); i++){
+    bluetooth.putc(bleTempData[i]);
   }
 }
 
@@ -107,7 +110,10 @@ int main() {
 
   tempValue = 0;
   bluetooth.baud(9600);
-  bluetooth.attach(&bleGetData);
+  //interrupt is failing to call correctly
+  //reverted to reading in main loop
+  //bluetooth.attach(&bleGetData);
+  bleData.clear();
 
   // Init the duty cycle array
 
@@ -116,19 +122,26 @@ int main() {
   // Init the Ticker to call the dutycyle updater at the required interval
   // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
 
-  myled = 1;
+  myled = 0;
   initInverter();
   __disable_irq();
   boost_ticker.attach(&boostUpdater, 2);
   __enable_irq();
 
-
   while(1){ //infinite loop
-    myled = myled^1;
-    wait(0.5);
-
-
+    //wait(0.5);
+    while(bluetooth.readable()){
+      myled = !myled;
+      bleData.push_back(bluetooth.getc());
+    }
+    //found delimiter, process command now
+    if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
+      EvalCode(bleData);
+      bluetooth.putc(' ');
+      bluetooth.putc('O');
+      bluetooth.putc('K');
+      bleData.clear();
+    }
   }
-
-
+  
 }
