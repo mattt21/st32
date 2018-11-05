@@ -41,10 +41,10 @@ Ticker boost_ticker;
 
 
 double getPanelVoltage(){
-  return DCVoltageIn.read()*3.3f*16;
+  return DCVoltageIn.read()*3.3f*46.0f;
 }
 double getPanelCurrent() {
-  return DCCurrentIn.read()*3.3f*1.6f;
+  return DCCurrentIn.read()*3.3f*10.0f/460.0f;
 
 }
 
@@ -157,6 +157,8 @@ int main() {
       newData = false;
       changeMotorFrequency(inputs[0]);
     }
+    pc.printf("%f\n", getPanelVoltage());
+    wait(0.5);
 
   }
 
