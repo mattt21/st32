@@ -97,8 +97,8 @@ void initInverter() {
 
 void changeMotorFrequency(double freq) {
   frequency = freq;
-  if(freq>60.0f) {
-    frequency = 60;
+  if(freq>53.0f) {
+    frequency = 53.0f;
   }
 
   pwm_ticker.detach();

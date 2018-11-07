@@ -39,7 +39,7 @@ AnalogIn DCVoltageIn (A5);
 Ticker boost_ticker;
 Ticker sensor_ticker;
 
-
+int new_boost = 0;
 
 double getBoostVoltage(){
   //return DCVoltageIn.read()*3.3f*46.0f;
@@ -169,7 +169,9 @@ void readVoltage() {
   Voltage.push(3.3f * DCVoltageIn.read()* 101.0f);
 
 }
-
+void setBoost() {
+  new_boost = 1;
+}
 
 
 int main() {
@@ -194,7 +196,7 @@ int main() {
   myled = 0;
   initInverter();
   sensor_ticker.attach(&readVoltage, 1.0f/((float) 100.0f));
-
+  boost_ticker.attach(&setBoost, 2);
   /*
   __disable_irq();
   boost_ticker.attach(&boostUpdater, 2);
@@ -220,6 +222,7 @@ int main() {
       bluetooth.putc('K');
       bleData.clear();
     }
+    if(new_boost == 1) {
     sensor_ticker.detach();
     double dutyCycle = calculateDutyCycle();
     double voltage = getBoostVoltage();
@@ -234,8 +237,9 @@ int main() {
     changeMotorFrequency(freq);
     sensor_ticker.attach(&readVoltage, 1.0f / ((float)100.0f));
     myled = myled^1;
-    wait(2);
+    new_boost = 0;
 
+  }
   }
 
 }
