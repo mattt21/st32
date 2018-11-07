@@ -42,8 +42,7 @@ bool EvalCode(std::vector<char> &bleData){
      */
     case OP_0 :
     {
-      float num = 1.121f;
-      std::string tempstringValue = ToString(num);
+      std::string tempstringValue = ToString(frequency);
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('0');
@@ -53,8 +52,7 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_1 :
     {
-      float num = 8.121f;
-      std::string tempstringValue = ToString(num);
+      std::string tempstringValue = ToString(frequency);
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('1');
@@ -64,8 +62,7 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_2 :
     {
-      float num = 100.12f;
-      std::string tempstringValue = ToString(num);
+      std::string tempstringValue = ToString(frequency);
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('2');
