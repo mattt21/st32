@@ -1,17 +1,21 @@
 #include "Inverter.h"
-
-
 DigitalOut AP(D3);
 DigitalOut AN(D9);
 DigitalOut BP(D8);
 DigitalOut BN(D12);
 DigitalOut CP(D6);
 DigitalOut CN(D7);
+Ticker pwm_ticker;
+
+double TRIANGLE_INCRIMENT = .3;
+double  SINE_OUT_FREQ   =  60;
+
+
 
 // Number of elements in sampled sine wave
-#define SINE_STEPS        750
+#define SINE_STEPS        400
 // Frequency of output triangle in Hz
-#define TRIANGE_FREQUENCY 12000
+#define TRIANGE_FREQUENCY 440
 // Number of steps per each Triangle Wave
 #define TRIANGLE_STEPS  10
 
@@ -22,6 +26,7 @@ DigitalOut CN(D7);
 // Table to generate the sine waveform using dutycycles
 float sine_duty[SINE_STEPS];
 
+<<<<<<< HEAD:lib/Inverter/Inverter.cpp
 void initInverter() {
   int i;
   // Generate Sine Wave
@@ -32,6 +37,8 @@ void initInverter() {
   //pwm_ticker.attach(&pwm_duty_updater, (1.0f / (float)(10 * TRIANGE_FREQUENCY) - 1e-6f));
 }
 
+=======
+>>>>>>> 9eedbe901f15bc2a27b85beb8d2e98c3fc9ec5c9:src/Inverter.cpp
 // Ticker calls this fucntion to update the PWM dutycycle
 void pwm_duty_updater() {
   // counter is the triangle wave to compare the sine to
@@ -90,4 +97,24 @@ void pwm_duty_updater() {
   if (sine_index >= SINE_STEPS) {
     sine_index = 0;
   }
+}
+void initInverter() {
+  int i;
+  // Generate Sine Wave
+  for (i=0; i<SINE_STEPS; i++) {
+    sine_duty[i] = sin(i * SINE_STEPS_RAD);
+  }
+  //Attach Intterupt
+  pwm_ticker.attach(&pwm_duty_updater, (1.0f / (float)(10.0f * TRIANGE_FREQUENCY)));
+
+}
+
+void changeMotorFrequency(double freq) {
+  int required_freq = freq;
+  if(freq>60.0f) {
+    required_freq = 60;
+  }
+
+  pwm_ticker.detach();
+  pwm_ticker.attach(&pwm_duty_updater, 1.0f/(10.0f*40.0f*required_freq));
 }

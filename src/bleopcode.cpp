@@ -32,7 +32,6 @@ bool EvalCode(std::vector<char> &bleData){
   //16-31 receives values
   opcodetype opcode = (opcodetype)number;
 
-
   switch(opcode){
 
     /*
