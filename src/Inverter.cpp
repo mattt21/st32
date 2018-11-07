@@ -9,7 +9,7 @@ Ticker pwm_ticker;
 
 double TRIANGLE_INCRIMENT = .3;
 double  SINE_OUT_FREQ   =  60;
-
+double frequency = 22.0f;
 
 
 // Number of elements in sampled sine wave
@@ -96,11 +96,11 @@ void initInverter() {
 }
 
 void changeMotorFrequency(double freq) {
-  int required_freq = freq;
+  frequency = freq;
   if(freq>60.0f) {
-    required_freq = 60;
+    frequency = 60;
   }
 
   pwm_ticker.detach();
-  pwm_ticker.attach(&pwm_duty_updater, 1.0f/(10.0f*40.0f*required_freq));
+  pwm_ticker.attach(&pwm_duty_updater, 1.0f/(10.0f*40.0f*frequency));
 }

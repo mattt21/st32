@@ -167,23 +167,10 @@ void onSerialRx() {
 }
 void readVoltage() {
   Voltage.push(3.3f * DCVoltageIn.read()* 101.0f);
-}
-
-void boostUpdater()
-{
-  sensor_ticker.detach();
-  static double dutyCycle = calculateDutyCycle();
-  double voltage = getBoostVoltage();
-  double freq = (6.0f/23.0f)*voltage/1.41421356237f;
-  pc.printf("voltage: %f frequency: %f\n", voltage, freq);
-  if(freq<=22.0f) {
-    freq = 22.0f;
-  }
-  changeMotorFrequency(freq);
-  sensor_ticker.attach(&readVoltage, 1.0f / ((float)600));
-  myled = myled^1;
 
 }
+
+
 
 int main() {
 
@@ -206,8 +193,7 @@ int main() {
 
   myled = 0;
   initInverter();
-  sensor_ticker.attach(&readVoltage, 1.0f/((float)600));
-  boost_ticker.attach(&boostUpdater, 2);
+  sensor_ticker.attach(&readVoltage, 1.0f/((float) 100.0f));
 
   /*
   __disable_irq();
@@ -234,6 +220,21 @@ int main() {
       bluetooth.putc('K');
       bleData.clear();
     }
+    sensor_ticker.detach();
+    double dutyCycle = calculateDutyCycle();
+    double voltage = getBoostVoltage();
+    double freq = (6.0f/23.0f)*voltage/1.41421356237f;
+    pc.printf("voltage: %f frequency: %f\n", voltage, freq);
+    if(freq<=1.0f) {
+      freq = 1.0f;
+    }
+    if(freq>=60.0f) {
+      freq = 60.0f;
+    }
+    changeMotorFrequency(freq);
+    sensor_ticker.attach(&readVoltage, 1.0f / ((float)100.0f));
+    myled = myled^1;
+    wait(2);
 
   }
 

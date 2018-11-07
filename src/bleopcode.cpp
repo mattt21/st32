@@ -2,6 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "bleopcode.h"
+#include "Inverter.h"
 #include <string>
 #include <sstream>
 #include <cstdio>
@@ -39,25 +40,31 @@ bool EvalCode(std::vector<char> &bleData){
      */
     case OP_0 :
     {
-      std::vector<char> tempVec;
+      std::string data = ToString(frequency);
+      std::vector<char> tempVec(data.begin(), data.end());
       tempVec.push_back('0');
-      tempVec.push_back('2');
-      tempVec.push_back('1');
-      tempVec.push_back('3');
+      tempVec.push_back('0');
+      tempVec.push_back('_');
       blePushData(tempVec);
       return true;
     }
     case OP_1 :
     {
-      std::vector<char> tempVec;
+      std::string data = ToString(frequency);
+      std::vector<char> tempVec(data.begin(), data.end());
+      tempVec.push_back('0');
       tempVec.push_back('1');
+      tempVec.push_back('_');
       blePushData(tempVec);
       return true;
     }
     case OP_2 :
     {
-      std::vector<char> tempVec;
+      std::string data = ToString(frequency);
+      std::vector<char> tempVec(data.begin(), data.end());
+      tempVec.push_back('0');
       tempVec.push_back('2');
+      tempVec.push_back('_');
       blePushData(tempVec);
       return true;
     }

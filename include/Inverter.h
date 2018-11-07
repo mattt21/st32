@@ -10,4 +10,6 @@ void initInverter();
 
 void changeMotorFrequency(double freq);
 
+extern double frequency;
+
 #endif
