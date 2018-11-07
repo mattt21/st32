@@ -20,7 +20,7 @@ queue <double> Voltage;
   device HM-10
   HM10 - STM32
   GND -> GND
-  VCC -> (5V)
+  VCC -> (3.3V)
   RX <-> D10 (tx)
   TX <-> D2(rx)
 */

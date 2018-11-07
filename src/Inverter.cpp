@@ -34,6 +34,7 @@ void pwm_duty_updater() {
   // Two vectors for the pins to open and close
   vector <DigitalOut> toZero;
   vector <DigitalOut> toOne;
+
   // Comparing the values for each PWM pin
   if (sine_duty[sine_index] >= counter && AP == 0) {
       toZero.push_back(AN);

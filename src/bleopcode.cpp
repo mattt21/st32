@@ -13,7 +13,8 @@ template <typename T>
 std::string ToString(T val)
 {
     std::stringstream stream;
-    stream << val;
+    stream.precision(4);
+    stream << std::fixed << val;
     return stream.str();
 }
 
@@ -37,11 +38,13 @@ bool EvalCode(std::vector<char> &bleData){
 
     /*
      * 0-15 input data only
+     * Use ToString to convert number data to string format
+     * vector<char>(str.begin(), str.end()) gets correct number
      */
     case OP_0 :
     {
-      std::string data = ToString(frequency);
-      std::vector<char> tempVec(data.begin(), data.end());
+      std::string tempstringValue = ToString(frequency);
+      std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('0');
       tempVec.push_back('_');
@@ -50,8 +53,8 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_1 :
     {
-      std::string data = ToString(frequency);
-      std::vector<char> tempVec(data.begin(), data.end());
+      std::string tempstringValue = ToString(frequency);
+      std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('1');
       tempVec.push_back('_');
@@ -60,8 +63,8 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_2 :
     {
-      std::string data = ToString(frequency);
-      std::vector<char> tempVec(data.begin(), data.end());
+      std::string tempstringValue = ToString(frequency);
+      std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('2');
       tempVec.push_back('_');
