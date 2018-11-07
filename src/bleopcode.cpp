@@ -31,8 +31,7 @@ bool EvalCode(std::vector<char> &bleData){
   //0-15 sends values
   //16-31 receives values
   opcodetype opcode = (opcodetype)number;
-  float num = 1.121f;
-  std::string tempstringValue = ToString(num);
+
 
   switch(opcode){
 
@@ -43,6 +42,8 @@ bool EvalCode(std::vector<char> &bleData){
      */
     case OP_0 :
     {
+      float num = 1.121f;
+      std::string tempstringValue = ToString(num);
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('0');
@@ -52,15 +53,23 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_1 :
     {
-      std::vector<char> tempVec;
+      float num = 8.121f;
+      std::string tempstringValue = ToString(num);
+      std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
+      tempVec.push_back('0');
       tempVec.push_back('1');
+      tempVec.push_back('_');
       blePushData(tempVec);
       return true;
     }
     case OP_2 :
     {
-      std::vector<char> tempVec;
+      float num = 100.12f;
+      std::string tempstringValue = ToString(num);
+      std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
+      tempVec.push_back('0');
       tempVec.push_back('2');
+      tempVec.push_back('_');
       blePushData(tempVec);
       return true;
     }
