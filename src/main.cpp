@@ -1,17 +1,18 @@
-#include "mbed.h"
+
 #include "rtos.h"
 #include "FastPWM.h"
 #include <string>
-#include <vector>
 #include "bleopcode.h"
 #include "Inverter.h"
-
-
+#include "main.h"
+#include "mbed.h"
+#include <queue>
 Serial pc(D1, D0); //tx, rx
 
 DigitalOut out (D14);
 
-
+double tempValue;
+queue <double> Voltage;
 
 
 
@@ -36,12 +37,20 @@ AnalogIn DCVoltageIn (A5);
 
 //Ticker to update the PWM dutycycle
 Ticker boost_ticker;
+Ticker sensor_ticker;
 
 
 
+double getBoostVoltage(){
+  //return DCVoltageIn.read()*3.3f*46.0f;
+  double voltage = 0;
+  double size = (double) Voltage.size();
+  while(!Voltage.empty()) {
+    voltage += (Voltage.front())/size;
+    Voltage.pop();
+  }
+  return voltage;
 
-double getPanelVoltage(){
-  return DCVoltageIn.read()*3.3f*46.0f;
 }
 double getPanelCurrent() {
   return DCCurrentIn.read()*3.3f*10.0f/460.0f;
@@ -77,30 +86,58 @@ double calculateDutyCycle()
   return 0.23;
 }
 
-void boostUpdater()
+
+std::vector<char> bleData;
+
+//Ensure data streams are correct
+bool validateChecksum(std::vector<char> &bleTempData)
 {
-  static double dutyCycle = calculateDutyCycle();
-  Boost.write(dutyCycle);
+    int32_t pos = 0;
+    char sum = 0;
+    for(int i = 0; i < bleTempData.size() - 1; i++){
+      sum += bleTempData[i];
+    }
+    // return 0 or 1 based on the checksum test
+    return (sum == bleTempData[bleTempData.size() - 1]) ? 1 : 0;
 }
 
+char calculateChecksum(std::vector<char> &bleTempData)
+{
+    char sum = 0;
+    for(int i = 0; i < bleTempData.size(); i++){
+      sum += bleTempData[i];
+    }
+    // put the checksum into the data stream
+    return sum;
+}
 /*
  * Interrupt for receiving
  * data from smart-phone
+ * '_' triggers eoc(end-of-command)
+ * opcode pulled from last 2 values
  */
 void bleGetData(){
-  std::vector<char> bleData;
-  bleData.clear();
   while(bluetooth.readable()){
     myled = !myled;
     bleData.push_back(bluetooth.getc());
-    //pc.printf("%c ", bleData[bleData.size() - 1]);
-    //bluetooth.putc(bleData[bleData.size() - 1]);
   }
-  EvalCode(bleData);
+  //found delimiter, process command now
+  if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
+    //EvalCode(bleData);
+    bluetooth.putc(' ');
+    bluetooth.putc('O');
+    bluetooth.putc('K');
+    bleData.clear();
+  }
 }
 
-void blePushData(std::vector<char> &bleData){
-  EvalCode(bleData);
+void blePushData(std::vector<char> &bleTempData){
+
+  for(int i = 0; i < bleTempData.size(); i++){
+    bluetooth.putc(bleTempData[i]);
+  }
+  //Place checksum
+  //bluetooth.putc(calculateChecksum(bleTempData));
 }
 
 volatile bool newData = false;
@@ -128,23 +165,50 @@ void onSerialRx() {
   }
 }
 }
+void readVoltage() {
+  Voltage.push(3.3f * DCVoltageIn.read()* 101.0f);
+}
+
+void boostUpdater()
+{
+  sensor_ticker.detach();
+  static double dutyCycle = calculateDutyCycle();
+  double voltage = getBoostVoltage();
+  double freq = (6.0f/23.0f)*voltage/1.41421356237f;
+  pc.printf("voltage: %f frequency: %f\n", voltage, freq);
+  if(freq<=22.0f) {
+    freq = 22.0f;
+  }
+  changeMotorFrequency(freq);
+  sensor_ticker.attach(&readVoltage, 1.0f / ((float)600));
+  myled = myled^1;
+
+}
 
 int main() {
 
   pc.attach(&onSerialRx);
+  tempValue = 0;
+
   bluetooth.baud(9600);
-  bluetooth.attach(&bleGetData);
+  //interrupt is failing to call correctly
+  //reverted to reading in main loop
+  //bluetooth.attach(&bleGetData);
+  bleData.clear();
 
   // Init the duty cycle array
 
-  Boost.period(1.0f/ (100000));
+  Boost.period(1.0f / (100000));
   Boost.write(0.23);
 
   // Init the Ticker to call the dutycyle updater at the required interval
   // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
 
-  myled = 1;
+  myled = 0;
   initInverter();
+  sensor_ticker.attach(&readVoltage, 1.0f/((float)600));
+  boost_ticker.attach(&boostUpdater, 2);
+
   /*
   __disable_irq();
   boost_ticker.attach(&boostUpdater, 2);
@@ -157,10 +221,20 @@ int main() {
       newData = false;
       changeMotorFrequency(inputs[0]);
     }
-    pc.printf("%f\n", getPanelVoltage());
-    wait(0.5);
+    while(bluetooth.readable()){
+      myled = !myled;
+      bleData.push_back(bluetooth.getc());
+    }
+    //found delimiter, process command now
+    if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
+      //calculateChecksum(bleData);
+      EvalCode(bleData);
+      bluetooth.putc(' ');
+      bluetooth.putc('O');
+      bluetooth.putc('K');
+      bleData.clear();
+    }
 
   }
-
 
 }

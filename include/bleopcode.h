@@ -6,6 +6,7 @@
 #define BLE_OPCODE
 
 #include <vector>
+#include "main.h"
 /*
  * Opcodes are split between
  * input and output.
@@ -54,7 +55,7 @@ enum opcodetype
    OP_28   = 0x1C,
    OP_29   = 0x1D,
    OP_30   = 0x1E,
-   OP_31   = 0x0F,
+   OP_31   = 0x1F,
 
 };
 
