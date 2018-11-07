@@ -29,8 +29,7 @@ void initInverter() {
     sine_duty[i] = sin(i * SINE_STEPS_RAD);
   }
   //Attach Intterupt
-  pwm_ticker.attach(&pwm_duty_updater, (1.0f / (float)(10 * TRIANGE_FREQUENCY) - 1e-6f));
-
+  //pwm_ticker.attach(&pwm_duty_updater, (1.0f / (float)(10 * TRIANGE_FREQUENCY) - 1e-6f));
 }
 
 // Ticker calls this fucntion to update the PWM dutycycle
@@ -41,6 +40,7 @@ void pwm_duty_updater() {
   // Two vectors for the pins to open and close
   vector <DigitalOut> toZero;
   vector <DigitalOut> toOne;
+
   // Comparing the values for each PWM pin
   if (sine_duty[sine_index] >= counter && AP == 0) {
       toZero.push_back(AN);
