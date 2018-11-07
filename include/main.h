@@ -6,7 +6,9 @@
 #define MAIN_H
 #include <vector>
 #include <algorithm>
+
 extern double tempValue;
+
 void blePushData(std::vector<char> &bleData);
 
 #endif

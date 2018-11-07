@@ -12,7 +12,8 @@ template <typename T>
 std::string ToString(T val)
 {
     std::stringstream stream;
-    stream << val;
+    stream.precision(4);
+    stream << std::fixed << val;
     return stream.str();
 }
 
