@@ -26,19 +26,6 @@ double frequency = 22.0f;
 // Table to generate the sine waveform using dutycycles
 float sine_duty[SINE_STEPS];
 
-<<<<<<< HEAD:lib/Inverter/Inverter.cpp
-void initInverter() {
-  int i;
-  // Generate Sine Wave
-  for (i=0; i<SINE_STEPS; i++) {
-    sine_duty[i] = sin(i * SINE_STEPS_RAD);
-  }
-  //Attach Intterupt
-  //pwm_ticker.attach(&pwm_duty_updater, (1.0f / (float)(10 * TRIANGE_FREQUENCY) - 1e-6f));
-}
-
-=======
->>>>>>> 9eedbe901f15bc2a27b85beb8d2e98c3fc9ec5c9:src/Inverter.cpp
 // Ticker calls this fucntion to update the PWM dutycycle
 void pwm_duty_updater() {
   // counter is the triangle wave to compare the sine to
