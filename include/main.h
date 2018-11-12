@@ -5,10 +5,13 @@
 #ifndef MAIN_H
 #define MAIN_H
 #include <vector>
+#include <mbed.h>
 #include <algorithm>
 
 extern double tempValue;
 
 void blePushData(std::vector<char> &bleData);
+
+extern Mutex freq_lock;
 
 #endif

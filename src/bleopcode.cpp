@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "bleopcode.h"
 #include "Inverter.h"
+#include "main.h"
 #include <string>
 #include <sstream>
 #include <cstdio>
@@ -43,7 +44,9 @@ bool EvalCode(std::vector<char> &bleData){
      */
     case OP_0 :
     {
+      freq_lock.lock();
       std::string tempstringValue = ToString(frequency);
+      freq_lock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('0');
@@ -53,7 +56,9 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_1 :
     {
+      freq_lock.lock();
       std::string tempstringValue = ToString(frequency);
+      freq_lock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('1');
@@ -63,7 +68,9 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_2 :
     {
+      freq_lock.lock();
       std::string tempstringValue = ToString(frequency);
+      freq_lock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('2');

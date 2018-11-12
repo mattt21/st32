@@ -5,7 +5,6 @@
 #include "bleopcode.h"
 #include "Inverter.h"
 #include "main.h"
-#include "mbed.h"
 #include <queue>
 Serial pc(D1, D0); //tx, rx
 
@@ -13,8 +12,7 @@ DigitalOut out (D14);
 
 double tempValue;
 queue <double> Voltage;
-
-
+Mutex freq_lock;
 
 /*
   device HM-10

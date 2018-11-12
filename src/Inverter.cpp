@@ -1,4 +1,5 @@
 #include "Inverter.h"
+#include "main.h"
 DigitalOut AP(D3);
 DigitalOut AN(D9);
 DigitalOut BP(D8);
@@ -97,6 +98,7 @@ void initInverter() {
 }
 
 void changeMotorFrequency(double freq) {
+  freq_lock.lock();
   frequency = freq;
   if(freq>60.0f) {
     frequency = 60;
@@ -104,4 +106,5 @@ void changeMotorFrequency(double freq) {
 
   pwm_ticker.detach();
   pwm_ticker.attach(&pwm_duty_updater, 1.0f/(10.0f*40.0f*frequency));
+  freq_lock.unlock();
 }

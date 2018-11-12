@@ -6,7 +6,6 @@
 #define BLE_OPCODE
 
 #include <vector>
-#include "main.h"
 /*
  * Opcodes are split between
  * input and output.
