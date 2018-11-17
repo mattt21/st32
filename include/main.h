@@ -17,5 +17,7 @@ void blePushData(std::vector<char> &bleData);
 void calibrate();
 extern Mutex freq_lock;
 extern Mutex voltage_lock;
+extern Mutex ratio_lock;
+
 
 #endif

@@ -12,6 +12,7 @@ DigitalOut out (D14);
 
 Mutex voltage_lock;
 Mutex freq_lock;
+Mutex ratio_lock;
 //double volt_ratio = 23.0f;
 //double freq_ratio = 6.0f;
 
@@ -173,7 +174,6 @@ int main() {
    //reverted to reading in main loop
    //bluetooth.attach(&bleGetData);
    bleData.clear();
-
    // Init the duty cycle array
 
 
@@ -199,7 +199,9 @@ int main() {
        sensor_ticker.detach();
        //voltageLock.lock();
        voltage = getBoostVoltage();
+       ratio_lock.lock();
        double freq = (freq_ratio/volt_ratio)*voltage/1.41421356237f;
+       ratio_lock.unlock();
        pc.printf("voltage: %f frequency: %f\n", voltage, freq);
        if(freq<=1.0f) {
          freq = 1.0f;

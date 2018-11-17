@@ -33,7 +33,7 @@ bool EvalCode(std::vector<char> &bleData){
   //Opcode value from 0-31
   //0-15 sends values
   //16-31 receives values
-  printf("%d\n", number);
+  //printf("%s\n", dataString);
   opcodetype opcode = (opcodetype)number;
   switch(opcode){
 
@@ -44,9 +44,9 @@ bool EvalCode(std::vector<char> &bleData){
      */
     case OP_0 :
     {
-      freq_lock.lock();
-      std::string tempstringValue = ToString(frequency);
-      freq_lock.unlock();
+      voltage_lock.lock();
+      std::string tempstringValue = ToString(voltage);
+      voltage_lock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('0');
@@ -56,9 +56,9 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_1 :
     {
-      freq_lock.lock();
+      voltage_lock.lock();
       std::string tempstringValue = ToString(voltage);
-      freq_lock.unlock();
+      voltage_lock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('1');
@@ -68,9 +68,9 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_2 :
     {
-      voltage_lock.lock();
-      std::string tempstringValue = ToString(voltage);
-      voltage_lock.unlock();
+      freq_lock.lock();
+      std::string tempstringValue = ToString(frequency);
+      freq_lock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('2');
@@ -155,9 +155,12 @@ bool EvalCode(std::vector<char> &bleData){
       bleData.pop_back();
       bleData.pop_back();
       bleData.pop_back();
-      float token = atof(&bleData[0]);
+      std::string data(bleData.begin(),bleData.end());
+      float token = atof(data.c_str());
+      ratio_lock.lock();
       volt_ratio = token/10.0f;
-      printf("%llf\n",token);
+      ratio_lock.unlock();
+      printf("token: %llf\n",token);
       return true;
     }
     //Set freq
@@ -167,9 +170,12 @@ bool EvalCode(std::vector<char> &bleData){
       bleData.pop_back();
       bleData.pop_back();
       bleData.pop_back();
-      float token = atof(&bleData[0]);
+      std::string data(bleData.begin(),bleData.end());
+      float token = atof(data.c_str());
+      ratio_lock.lock();
       freq_ratio = token/10.0f;
-      printf("%llf\n",token);
+      ratio_lock.unlock();
+      printf("token: %llf\n",token);
       return true;
     }
     //Set power
@@ -179,8 +185,10 @@ bool EvalCode(std::vector<char> &bleData){
       bleData.pop_back();
       bleData.pop_back();
       bleData.pop_back();
-      float token = atof(&bleData[0]);
-      printf("%llf\n",token);
+      std::string data(bleData.begin(),bleData.end());
+      float token = atof(data.c_str());
+      //freq_ratio = token/10.0f;
+      printf("token: %llf\n",token);
       return true;
     }
     //Set duty
