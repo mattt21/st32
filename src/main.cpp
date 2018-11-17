@@ -16,8 +16,8 @@ Mutex ratio_lock;
 //double volt_ratio = 23.0f;
 //double freq_ratio = 6.0f;
 
-double volt_ratio = 0.0f;
-double freq_ratio = 0.0f;
+double volt_ratio = 24.0f;
+double freq_ratio = 6.0f;
 
 bool isCalibrated = false;
 double tempValue;
@@ -159,7 +159,7 @@ void setBoost() {
 
 void calibrate(){
   Boost.period(1.0f / (150000));
-  Boost.write(0.23);
+  Boost.write(0.8);
   initInverter();
   sensor_ticker.attach(&readVoltage, 1.0f/500);
   boost_ticker.attach(&setBoost, .5);
@@ -182,7 +182,8 @@ int main() {
 
    myled = 0;
 
-
+   calibrate();
+   isCalibrated = true;
    out = 1;
    while(1){ //infinite loop
      while(bluetooth.readable()){
@@ -197,12 +198,12 @@ int main() {
      }
      if(isCalibrated && new_boost == 1) {
        sensor_ticker.detach();
-       voltage_lock.lock();
+       //voltage_lock.lock();
        voltage = getBoostVoltage();
-       voltage_lock.unlock();
-       ratio_lock.lock();
-       double freq = (freq_ratio/volt_ratio)*voltage/1.41421356237f;
-       ratio_lock.unlock();
+       //voltage_lock.unlock();
+       //ratio_lock.lock();
+       double freq = (6.0f/24.0f)*voltage/1.41421356237f;
+       //ratio_lock.unlock();
        pc.printf("voltage: %f frequency: %f\n", voltage, freq);
        if(freq<=1.0f) {
          freq = 1.0f;

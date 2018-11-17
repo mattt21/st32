@@ -143,7 +143,7 @@ bool EvalCode(std::vector<char> &bleData){
     /*
      * 16-31 output data only
      */
-    //Set volt
+    //Set freq
     case OP_16 :
     {
       if(!isCalibrated){
@@ -158,12 +158,12 @@ bool EvalCode(std::vector<char> &bleData){
       std::string data(bleData.begin(),bleData.end());
       float token = atof(data.c_str());
       ratio_lock.lock();
-      volt_ratio = token/10.0f;
+      freq_ratio = token/10.0f;
       ratio_lock.unlock();
       printf("token: %llf\n",token);
       return true;
     }
-    //Set freq
+    //Set volt
     case OP_17 :
     {
       //remove opcode and delimiter
@@ -173,7 +173,7 @@ bool EvalCode(std::vector<char> &bleData){
       std::string data(bleData.begin(),bleData.end());
       float token = atof(data.c_str());
       ratio_lock.lock();
-      freq_ratio = token/10.0f;
+      volt_ratio = token/10.0f;
       ratio_lock.unlock();
       printf("token: %llf\n",token);
       return true;
