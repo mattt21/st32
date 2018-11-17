@@ -197,8 +197,9 @@ int main() {
      }
      if(isCalibrated && new_boost == 1) {
        sensor_ticker.detach();
-       //voltageLock.lock();
+       voltage_lock.lock();
        voltage = getBoostVoltage();
+       voltage_lock.unlock();
        ratio_lock.lock();
        double freq = (freq_ratio/volt_ratio)*voltage/1.41421356237f;
        ratio_lock.unlock();
