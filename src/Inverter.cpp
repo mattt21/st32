@@ -10,7 +10,7 @@ Ticker pwm_ticker;
 double TRIANGLE_INCRIMENT = .3;
 double  SINE_OUT_FREQ   =  60;
 double frequency = 22.0f;
-
+Mutex frequencyLock;
 
 // Number of elements in sampled sine wave
 #define SINE_STEPS        400
@@ -97,10 +97,12 @@ void initInverter() {
 }
 
 void changeMotorFrequency(double freq) {
+  //frequencyLock.lock();
   frequency = freq;
   if(freq>53.0f) {
     frequency = 53.0f;
   }
+  //frequencyLock.unlock();
 
   pwm_ticker.detach();
   pwm_ticker.attach(&pwm_duty_updater, 1.0f/(10.0f*40.0f*frequency));

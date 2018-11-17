@@ -6,9 +6,10 @@
 #define MAIN_H
 #include <vector>
 #include <algorithm>
+#include "rtos.h"
 
 extern double tempValue;
-
+extern double voltage;
 void blePushData(std::vector<char> &bleData);
-
+//extern Mutex voltageLock;
 #endif

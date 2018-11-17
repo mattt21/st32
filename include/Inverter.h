@@ -1,6 +1,7 @@
 #ifndef INVERTER_H
 #define INVERTER_H
 #include "mbed.h"
+#include "rtos.h"
 #include <vector>
 // Number of dutycycle steps for output wave
 
@@ -11,5 +12,7 @@ void initInverter();
 void changeMotorFrequency(double freq);
 
 extern double frequency;
+//extern Mutex frequencyLock;
+
 
 #endif

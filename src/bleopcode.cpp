@@ -3,17 +3,20 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "bleopcode.h"
 #include "Inverter.h"
+#include "main.h"
 #include <string>
 #include <sstream>
 #include <cstdio>
 #include <stdio.h>
 #include <stdlib.h>
 
+Serial pc2(D1, D0); //tx, rx
+
 template <typename T>
 std::string ToString(T val)
 {
     std::stringstream stream;
-    stream.precision(4);
+    stream.precision(2);
     stream << std::fixed << val;
     return stream.str();
 }
@@ -43,7 +46,10 @@ bool EvalCode(std::vector<char> &bleData){
      */
     case OP_0 :
     {
+      //frequencyLock.lock();
       std::string tempstringValue = ToString(frequency);
+      //frequencyLock.unlock();
+      //pc2.printf("\n freqConverted: %lf", frequency);
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('0');
@@ -53,7 +59,9 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_1 :
     {
-      std::string tempstringValue = ToString(frequency);
+      //voltageLock.lock();
+      std::string tempstringValue = ToString(voltage);
+      //voltageLock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('1');
