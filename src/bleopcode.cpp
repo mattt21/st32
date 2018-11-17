@@ -143,16 +143,24 @@ bool EvalCode(std::vector<char> &bleData){
     /*
      * 16-31 output data only
      */
+    //Set volt
     case OP_16 :
     {
+      if(!isCalibrated){
+        calibrate();
+      }
+      isCalibrated = true;
+
       //remove opcode and delimiter
       bleData.pop_back();
       bleData.pop_back();
       bleData.pop_back();
       float token = atof(&bleData[0]);
+      volt_ratio = token/10.0f;
       printf("%llf\n",token);
       return true;
     }
+    //Set freq
     case OP_17 :
     {
       //remove opcode and delimiter
@@ -160,9 +168,11 @@ bool EvalCode(std::vector<char> &bleData){
       bleData.pop_back();
       bleData.pop_back();
       float token = atof(&bleData[0]);
+      freq_ratio = token/10.0f;
       printf("%llf\n",token);
       return true;
     }
+    //Set power
     case OP_18 :
     {
       //remove opcode and delimiter
@@ -173,6 +183,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Set duty
     case OP_19 :
     {
       //remove opcode and delimiter

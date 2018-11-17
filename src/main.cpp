@@ -12,7 +12,13 @@ DigitalOut out (D14);
 
 Mutex voltage_lock;
 Mutex freq_lock;
+//double volt_ratio = 23.0f;
+//double freq_ratio = 6.0f;
 
+double volt_ratio = 0.0f;
+double freq_ratio = 0.0f;
+
+bool isCalibrated = false;
 double tempValue;
 queue <double> Voltage;
 double voltage = 0;
@@ -150,6 +156,14 @@ void setBoost() {
   new_boost = 1;
 }
 
+void calibrate(){
+  Boost.period(1.0f / (150000));
+  Boost.write(0.23);
+  initInverter();
+  sensor_ticker.attach(&readVoltage, 1.0f/500);
+  boost_ticker.attach(&setBoost, .5);
+}
+
 int main() {
 
    pc.attach(&onSerialRx);
@@ -162,26 +176,15 @@ int main() {
 
    // Init the duty cycle array
 
-   Boost.period(1.0f / (150000));
-   Boost.write(0.23);
 
    // Init the Ticker to call the dutycyle updater at the required interval
    // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
 
    myled = 0;
-   initInverter();
-   sensor_ticker.attach(&readVoltage, 1.0f/500);
-   boost_ticker.attach(&setBoost, .5);
+
 
    out = 1;
    while(1){ //infinite loop
-     /*
-     if(newData) {
-       pc.printf("%f\n", inputs[0]);
-       newData = false;
-       changeMotorFrequency(inputs[0]);
-     }
-     */
      while(bluetooth.readable()){
        myled = !myled;
        bleData.push_back(bluetooth.getc());
@@ -190,31 +193,27 @@ int main() {
      if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
        //calculateChecksum(bleData);
        EvalCode(bleData);
-       //bluetooth.putc(' ');
-       bluetooth.putc('O');
-       bluetooth.putc('K');
        bleData.clear();
      }
-     if(new_boost == 1) {
-     sensor_ticker.detach();
-     //voltageLock.lock();
-     voltage = getBoostVoltage();
-     double freq = (6.0f/23.0f)*voltage/1.41421356237f;
-     pc.printf("voltage: %f frequency: %f\n", voltage, freq);
-     if(freq<=1.0f) {
-       freq = 1.0f;
-     }
-     if(freq>=60.0f) {
-       freq = 60.0f;
-     }
-     changeMotorFrequency(freq);
-     sensor_ticker.attach(&readVoltage, 1.0f/ 500);
-     new_boost = 0;
-     myled = myled^1;
-     //voltageLock.unlock();
-
+     if(isCalibrated && new_boost == 1) {
+       sensor_ticker.detach();
+       //voltageLock.lock();
+       voltage = getBoostVoltage();
+       double freq = (freq_ratio/volt_ratio)*voltage/1.41421356237f;
+       pc.printf("voltage: %f frequency: %f\n", voltage, freq);
+       if(freq<=1.0f) {
+         freq = 1.0f;
+       }
+       if(freq>=60.0f) {
+         freq = 60.0f;
+       }
+       changeMotorFrequency(freq);
+       sensor_ticker.attach(&readVoltage, 1.0f/ 500);
+       new_boost = 0;
+       myled = myled^1;
+       //voltageLock.unlock();
     }
-    if (new_voltage == 1) {
+    if (isCalibrated && new_voltage == 1) {
       setReadVoltage();
       new_voltage = 0;
     }
