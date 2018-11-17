@@ -10,9 +10,13 @@ Serial pc(D1, D0); //tx, rx
 
 DigitalOut out (D14);
 
+Mutex voltage_lock;
+Mutex freq_lock;
+
 double tempValue;
 queue <double> Voltage;
-Mutex freq_lock;
+double voltage = 0;
+int new_voltage = 0;
 
 /*
   device HM-10
@@ -37,7 +41,9 @@ AnalogIn DCVoltageIn (A5);
 Ticker boost_ticker;
 Ticker sensor_ticker;
 
-
+int new_boost = 0;
+double voltage_sum = 0;
+double voltage_count = 0;
 
 double getBoostVoltage(){
   //return DCVoltageIn.read()*3.3f*46.0f;
@@ -54,36 +60,6 @@ double getPanelCurrent() {
   return DCCurrentIn.read()*3.3f*10.0f/460.0f;
 
 }
-
-double calculateDutyCycle()
-{
-  /*
-  static double old_solar_panel_voltage = 0;
-  static double old_solar_panel_current = 0;
-  static double dutyCycle = 0.5;
-  double deltaB = 0.001;
-  double current_pannel_voltage = getPanelVoltage();
-  double current_panel_current = getPanelCurrent();
-
-  double panel_power = current_panel_current*current_pannel_voltage;
-  double past_power = old_solar_panel_current*old_solar_panel_voltage;
-
-  if (panel_power > past_power) {
-
-    dutyCycle += deltaB;
-    return dutyCycle
-  }
-  if (past_power > panel_power) {
-  deltaB *= -1;
-  dutyCycle += deltaB;
-  return dutyCycle;
-}
-  return dutyCycle;
-
-  */
-  return 0.23;
-}
-
 
 std::vector<char> bleData;
 
@@ -164,76 +140,83 @@ void onSerialRx() {
 }
 }
 void readVoltage() {
-  Voltage.push(3.3f * DCVoltageIn.read()* 101.0f);
-
+  new_voltage = 1;
 }
-
-
+void setReadVoltage() {
+  voltage_sum = voltage_sum + 3.3f*101.0f*DCVoltageIn.read();
+  voltage_count = voltage_count + 1;
+}
+void setBoost() {
+  new_boost = 1;
+}
 
 int main() {
 
-  pc.attach(&onSerialRx);
-  tempValue = 0;
+   pc.attach(&onSerialRx);
+   tempValue = 0;
+   bluetooth.baud(9600);
+   //interrupt is failing to call correctly
+   //reverted to reading in main loop
+   //bluetooth.attach(&bleGetData);
+   bleData.clear();
 
-  bluetooth.baud(9600);
-  //interrupt is failing to call correctly
-  //reverted to reading in main loop
-  //bluetooth.attach(&bleGetData);
-  bleData.clear();
+   // Init the duty cycle array
 
-  // Init the duty cycle array
+   Boost.period(1.0f / (150000));
+   Boost.write(0.23);
 
-  Boost.period(1.0f / (100000));
-  Boost.write(0.23);
+   // Init the Ticker to call the dutycyle updater at the required interval
+   // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
 
-  // Init the Ticker to call the dutycyle updater at the required interval
-  // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
+   myled = 0;
+   initInverter();
+   sensor_ticker.attach(&readVoltage, 1.0f/500);
+   boost_ticker.attach(&setBoost, .5);
 
-  myled = 0;
-  initInverter();
-  sensor_ticker.attach(&readVoltage, 1.0f/((float) 100.0f));
+   out = 1;
+   while(1){ //infinite loop
+     /*
+     if(newData) {
+       pc.printf("%f\n", inputs[0]);
+       newData = false;
+       changeMotorFrequency(inputs[0]);
+     }
+     */
+     while(bluetooth.readable()){
+       myled = !myled;
+       bleData.push_back(bluetooth.getc());
+     }
+     //found delimiter, process command now
+     if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
+       //calculateChecksum(bleData);
+       EvalCode(bleData);
+       //bluetooth.putc(' ');
+       bluetooth.putc('O');
+       bluetooth.putc('K');
+       bleData.clear();
+     }
+     if(new_boost == 1) {
+     sensor_ticker.detach();
+     //voltageLock.lock();
+     voltage = getBoostVoltage();
+     double freq = (6.0f/23.0f)*voltage/1.41421356237f;
+     pc.printf("voltage: %f frequency: %f\n", voltage, freq);
+     if(freq<=1.0f) {
+       freq = 1.0f;
+     }
+     if(freq>=60.0f) {
+       freq = 60.0f;
+     }
+     changeMotorFrequency(freq);
+     sensor_ticker.attach(&readVoltage, 1.0f/ 500);
+     new_boost = 0;
+     myled = myled^1;
+     //voltageLock.unlock();
 
-  /*
-  __disable_irq();
-  boost_ticker.attach(&boostUpdater, 2);
-  __enable_irq();
-  */
-  out = 1;
-  while(1){ //infinite loop
-    if(newData) {
-      pc.printf("%f\n", inputs[0]);
-      newData = false;
-      changeMotorFrequency(inputs[0]);
     }
-    while(bluetooth.readable()){
-      myled = !myled;
-      bleData.push_back(bluetooth.getc());
+    if (new_voltage == 1) {
+      setReadVoltage();
+      new_voltage = 0;
     }
-    //found delimiter, process command now
-    if(std::find(bleData.begin(), bleData.end(), '_') != bleData.end()){
-      //calculateChecksum(bleData);
-      EvalCode(bleData);
-      bluetooth.putc(' ');
-      bluetooth.putc('O');
-      bluetooth.putc('K');
-      bleData.clear();
-    }
-    sensor_ticker.detach();
-    double dutyCycle = calculateDutyCycle();
-    double voltage = getBoostVoltage();
-    double freq = (6.0f/23.0f)*voltage/1.41421356237f;
-    pc.printf("voltage: %f frequency: %f\n", voltage, freq);
-    if(freq<=1.0f) {
-      freq = 1.0f;
-    }
-    if(freq>=60.0f) {
-      freq = 60.0f;
-    }
-    changeMotorFrequency(freq);
-    sensor_ticker.attach(&readVoltage, 1.0f / ((float)100.0f));
-    myled = myled^1;
-    wait(2);
-
   }
-
 }

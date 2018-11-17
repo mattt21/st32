@@ -1,5 +1,4 @@
 #include "Inverter.h"
-#include "main.h"
 DigitalOut AP(D3);
 DigitalOut AN(D9);
 DigitalOut BP(D8);
@@ -11,7 +10,7 @@ Ticker pwm_ticker;
 double TRIANGLE_INCRIMENT = .3;
 double  SINE_OUT_FREQ   =  60;
 double frequency = 22.0f;
-
+Mutex frequencyLock;
 
 // Number of elements in sampled sine wave
 #define SINE_STEPS        400
@@ -98,13 +97,13 @@ void initInverter() {
 }
 
 void changeMotorFrequency(double freq) {
-  freq_lock.lock();
+  //frequencyLock.lock();
   frequency = freq;
-  if(freq>60.0f) {
-    frequency = 60;
+  if(freq>53.0f) {
+    frequency = 53.0f;
   }
+  //frequencyLock.unlock();
 
   pwm_ticker.detach();
   pwm_ticker.attach(&pwm_duty_updater, 1.0f/(10.0f*40.0f*frequency));
-  freq_lock.unlock();
 }

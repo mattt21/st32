@@ -5,13 +5,13 @@
 #ifndef MAIN_H
 #define MAIN_H
 #include <vector>
-#include <mbed.h>
 #include <algorithm>
+#include "rtos.h"
 
 extern double tempValue;
-
+extern double voltage;
 void blePushData(std::vector<char> &bleData);
-
 extern Mutex freq_lock;
+extern Mutex voltage_lock;
 
 #endif

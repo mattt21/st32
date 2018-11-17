@@ -8,7 +8,7 @@
 #include <sstream>
 #include <cstdio>
 #include <stdio.h>
-#include <stdlib.h>
+#include "mbed.h"
 
 template <typename T>
 std::string ToString(T val)
@@ -33,8 +33,8 @@ bool EvalCode(std::vector<char> &bleData){
   //Opcode value from 0-31
   //0-15 sends values
   //16-31 receives values
+  printf("%d\n", number);
   opcodetype opcode = (opcodetype)number;
-
   switch(opcode){
 
     /*
@@ -57,7 +57,7 @@ bool EvalCode(std::vector<char> &bleData){
     case OP_1 :
     {
       freq_lock.lock();
-      std::string tempstringValue = ToString(frequency);
+      std::string tempstringValue = ToString(voltage);
       freq_lock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
@@ -68,9 +68,9 @@ bool EvalCode(std::vector<char> &bleData){
     }
     case OP_2 :
     {
-      freq_lock.lock();
-      std::string tempstringValue = ToString(frequency);
-      freq_lock.unlock();
+      voltage_lock.lock();
+      std::string tempstringValue = ToString(voltage);
+      voltage_lock.unlock();
       std::vector<char> tempVec(tempstringValue.begin(), tempstringValue.end());
       tempVec.push_back('0');
       tempVec.push_back('2');
@@ -145,62 +145,145 @@ bool EvalCode(std::vector<char> &bleData){
      */
     case OP_16 :
     {
+      //remove opcode and delimiter
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_17 :
     {
+      //remove opcode and delimiter
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_18 :
     {
+      //remove opcode and delimiter
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_19 :
     {
+      //remove opcode and delimiter
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_20 :
     {
+      //remove opcode and delimiter
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_21 :
     {
+      //remove opcode and delimiter
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_22 :
     {
+      //remove opcode and delimiter
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_23 :
     {
+      //remove opcode and delimiter
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_24 :
     {
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_25 :
     {
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_26 :
     {
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_27 :
     {
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_28 :
     {
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_29 :
     {
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_30 :
     {
+      bleData.pop_back();
+      bleData.pop_back();
+      bleData.pop_back();
+      float token = atof(&bleData[0]);
+      printf("%llf\n",token);
       return true;
     }
     case OP_31 :
