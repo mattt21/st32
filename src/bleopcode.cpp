@@ -33,7 +33,7 @@ bool EvalCode(std::vector<char> &bleData){
   //Opcode value from 0-31
   //0-15 sends values
   //16-31 receives values
-  //printf("%s\n", dataString);
+  printf("%d\n", number);
   opcodetype opcode = (opcodetype)number;
   switch(opcode){
 
@@ -42,6 +42,7 @@ bool EvalCode(std::vector<char> &bleData){
      * Use ToString to convert number data to string format
      * vector<char>(str.begin(), str.end()) gets correct number
      */
+    //Get voltage
     case OP_0 :
     {
       voltage_lock.lock();
@@ -54,6 +55,7 @@ bool EvalCode(std::vector<char> &bleData){
       blePushData(tempVec);
       return true;
     }
+    //Get voltage
     case OP_1 :
     {
       voltage_lock.lock();
@@ -66,6 +68,7 @@ bool EvalCode(std::vector<char> &bleData){
       blePushData(tempVec);
       return true;
     }
+    //Get freq
     case OP_2 :
     {
       freq_lock.lock();
@@ -198,10 +201,14 @@ bool EvalCode(std::vector<char> &bleData){
       bleData.pop_back();
       bleData.pop_back();
       bleData.pop_back();
-      float token = atof(&bleData[0]);
+      std::string data(bleData.begin(),bleData.end());
+      float token = atof(data.c_str());
+      duty_cycle = token/100.0f;
+      setDuty(duty_cycle);
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_20 :
     {
       //remove opcode and delimiter
@@ -212,6 +219,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_21 :
     {
       //remove opcode and delimiter
@@ -222,6 +230,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_22 :
     {
       //remove opcode and delimiter
@@ -232,6 +241,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_23 :
     {
       //remove opcode and delimiter
@@ -242,6 +252,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_24 :
     {
       bleData.pop_back();
@@ -251,6 +262,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_25 :
     {
       bleData.pop_back();
@@ -260,6 +272,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_26 :
     {
       bleData.pop_back();
@@ -269,6 +282,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_27 :
     {
       bleData.pop_back();
@@ -278,6 +292,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_28 :
     {
       bleData.pop_back();
@@ -287,6 +302,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_29 :
     {
       bleData.pop_back();
@@ -296,6 +312,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_30 :
     {
       bleData.pop_back();
@@ -305,6 +322,7 @@ bool EvalCode(std::vector<char> &bleData){
       printf("%llf\n",token);
       return true;
     }
+    //Unused
     case OP_31 :
     {
       std::vector<char> tempVec;
@@ -313,6 +331,7 @@ bool EvalCode(std::vector<char> &bleData){
       blePushData(tempVec);
       return true;
     }
+    //Unused
     default :
     {
       std::vector<char> tempVec;

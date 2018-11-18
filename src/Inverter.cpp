@@ -97,12 +97,12 @@ void initInverter() {
 }
 
 void changeMotorFrequency(double freq) {
-  //freq_lock.lock();
+  freq_lock.lock();
   frequency = freq;
   if(freq>53.0f) {
     frequency = 53.0f;
   }
   pwm_ticker.detach();
   pwm_ticker.attach(&pwm_duty_updater, 1.0f/(10.0f*40.0f*frequency));
-  //freq_lock.unlock();
+  freq_lock.unlock();
 }

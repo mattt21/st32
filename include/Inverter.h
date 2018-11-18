@@ -12,6 +12,8 @@ void initInverter();
 
 void changeMotorFrequency(double freq);
 
+void updateMotorFrequency(double freq);
+
 extern double frequency;
 //extern Mutex frequencyLock;
 
