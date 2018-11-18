@@ -14,9 +14,8 @@ Mutex voltage_lock;
 Mutex freq_lock;
 Mutex ratio_lock;
 
-double volt_ratio = 24.0f;
+double volt_ratio = 23.0f;
 double freq_ratio = 6.0f;
-double duty_cycle = 0.8;
 
 bool isCalibrated = false;
 double tempValue;
@@ -154,12 +153,14 @@ void setBoost() {
 }
 
 void setDuty(double duty_var){
+  pc.printf("SetDuty %llf\n", duty_var);
   Boost.write(duty_var);
+  pc.printf("SetDuty Success\n");
 }
 
 void calibrate(){
   Boost.period(1.0f / (150000));
-  Boost.write(duty_cycle);
+  Boost.write(0.2);
   initInverter();
   sensor_ticker.attach(&readVoltage, 1.0f/500);
   boost_ticker.attach(&setBoost, .5);
@@ -181,8 +182,8 @@ int main() {
    // The update should be at (SINE_STEPS * SINE_OUT_FREQ)
 
    myled = 0;
-   //isCalibrated = true;
-   //calibrate();
+   isCalibrated = true;
+   calibrate();
    out = 1;
    while(1){ //infinite loop
      while(bluetooth.readable()){

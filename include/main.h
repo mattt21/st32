@@ -12,7 +12,6 @@ extern double tempValue;
 extern double voltage;
 extern double freq_ratio;
 extern double volt_ratio;
-extern double duty_cycle;
 extern bool isCalibrated;
 void blePushData(std::vector<char> &bleData);
 void calibrate();

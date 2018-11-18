@@ -146,7 +146,7 @@ bool EvalCode(std::vector<char> &bleData){
     /*
      * 16-31 output data only
      */
-    //Set freq
+    //Set freq last from app
     case OP_16 :
     {
       if(!isCalibrated){
@@ -203,7 +203,7 @@ bool EvalCode(std::vector<char> &bleData){
       bleData.pop_back();
       std::string data(bleData.begin(),bleData.end());
       float token = atof(data.c_str());
-      duty_cycle = token/100.0f;
+      double duty_cycle = token/100.0f;
       setDuty(duty_cycle);
       printf("%llf\n",token);
       return true;
